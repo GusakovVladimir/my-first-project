@@ -17,11 +17,32 @@
     />
 
     <style>
+      /* CSS переменные для тем */
+      :root {
+        --bg-color: #0f172a;
+        --text-color: #e2e8f0;
+        --text-muted-color: #94a3b8;
+        --card-bg: rgba(15, 23, 42, 0.6);
+        --card-border: rgba(255, 255, 255, 0.1);
+        --link-color: #7dd3fc;
+      }
+
+      body.light-theme {
+        --bg-color: #f1f5f9;
+        --text-color: #1e293b;
+        --text-muted-color: #475569;
+        --card-bg: rgba(255, 255, 255, 0.6);
+        --card-border: rgba(0, 0, 0, 0.1);
+        --link-color: #0ea5e9;
+      }
+
       body {
         font-family: "Inter", sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        background-color: #0f172a; /* Цвет фона slate-900 */
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.5s ease, color 0.5s ease;
       }
 
       #page-canvas {
@@ -30,14 +51,14 @@
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: -1; /* Помещаем canvas за весь контент */
+        z-index: -1;
       }
 
       .glass-card {
-        background: rgba(15, 23, 42, 0.6);
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 1.5rem;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -46,8 +67,6 @@
       }
 
       .glass-card:hover {
-        background: rgba(15, 23, 42, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.2);
         transform: translateY(-8px);
         box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.35);
       }
@@ -285,61 +304,34 @@
         }
       }
 
-      /* --- ОБНОВЛЕННЫЙ КОД: Стили для кнопки с GIF-эффектом --- */
-      .aurora-button {
-        background: rgba(15, 23, 42, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        animation: pulse-glow 4s infinite ease-in-out;
+      /* --- НОВЫЙ КОД: Стили для кнопки с молниями --- */
+      .lightning-button {
+        background-color: rgba(15, 23, 42, 0.8);
+        border: 2px solid rgba(103, 232, 249, 0.8);
+        box-shadow: 0 0 10px rgba(103, 232, 249, 0.5);
       }
-      .aurora-button:hover {
+      .lightning-button:hover {
         transform: scale(1.1);
-        box-shadow: 0 0 25px rgba(103, 232, 249, 0.8),
-          0 0 25px rgba(167, 139, 250, 0.6);
+        box-shadow: 0 0 20px rgba(103, 232, 249, 0.8);
       }
-      @keyframes pulse-glow {
-        0%,
-        100% {
-          box-shadow: 0 0 15px rgba(103, 232, 249, 0.5),
-            0 0 15px rgba(167, 139, 250, 0.3);
-        }
-        50% {
-          box-shadow: 0 0 25px rgba(103, 232, 249, 0.8),
-            0 0 25px rgba(167, 139, 250, 0.5);
-        }
+      #lightning-canvas {
+        pointer-events: none; /* Canvas не должен перехватывать клики */
       }
-      .gif-effect-circle {
-        transform-origin: center;
-        stroke-dasharray: 63; /* ~2 * PI * 10 */
-        stroke-dashoffset: 63;
-        animation: draw-circle 3s infinite linear;
-      }
-      @keyframes draw-circle {
-        0% {
-          stroke-dashoffset: 63;
-          transform: rotate(-90deg);
-          opacity: 1;
-        }
-        50% {
-          stroke-dashoffset: 0;
-          transform: rotate(270deg);
-          opacity: 1;
-        }
-        75%,
-        100% {
-          stroke-dashoffset: -63;
-          transform: rotate(270deg);
-          opacity: 0;
-        }
-      }
-      /* --- КОНЕЦ ОБНОВЛЕННОГО КОДА --- */
+      /* --- КОНЕЦ НОВОГО КОДА --- */
     </style>
   </head>
-  <body class="bg-slate-900 text-white leading-relaxed">
+  <body class="text-slate-200">
     <!-- Canvas для глобального фона -->
     <canvas id="page-canvas"></canvas>
 
     <div class="relative min-h-screen px-4 sm:px-6 lg:px-8">
       <header class="glass-card sticky top-4 z-20 mt-4 header-animation">
+        <!-- Canvas для молний -->
+        <canvas
+          id="lightning-canvas"
+          class="absolute top-0 left-0 w-full h-full z-0"
+        ></canvas>
+
         <div
           class="relative z-10 container mx-auto flex justify-between items-center p-2 sm:p-4"
         >
@@ -380,24 +372,9 @@
           <!-- Центральная часть (кнопка) -->
           <div class="flex-shrink-0 hidden md:flex">
             <button
-              class="aurora-button group w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-300"
-            >
-              <svg
-                class="w-8 h-8"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  class="gif-effect-circle"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="#67e8f9"
-                  stroke-width="2"
-                />
-              </svg>
-            </button>
+              id="lightning-button"
+              class="lightning-button group w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-300"
+            ></button>
           </div>
 
           <!-- Правая часть -->
@@ -413,7 +390,7 @@
                 >Контакты</a
               >
             </nav>
-            <button id="mobile-menu-button" class="md:hidden z-30">
+            <button id="mobile-menu-button" class="md:hidden z-30 p-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-6 w-6"
@@ -456,7 +433,10 @@
             <h1 class="text-4xl md:text-6xl font-bold mb-4">
               Привет, я Full-Stack Developer
             </h1>
-            <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto">
+            <p
+              class="text-lg md:text-xl text-slate-300"
+              style="color: var(--text-muted-color)"
+            >
               Создаю красивые и функциональные веб-приложения от идеи до
               развертывания.
             </p>
@@ -472,7 +452,10 @@
                 alt="Gusakov"
                 class="rounded-full w-36 h-36 border-4 border-white/10 object-cover"
               />
-              <p class="text-slate-300 text-center md:text-left">
+              <p
+                class="text-slate-300 text-center md:text-left"
+                style="color: var(--text-muted-color)"
+              >
                 Я увлеченный разработчик с опытом работы более 5 лет. Моя
                 страсть — превращать сложные идеи в элегантные и интуитивно
                 понятные цифровые продукты. Я верю, что хороший дизайн — это не
@@ -556,13 +539,17 @@
               <h3 class="text-xl font-semibold mb-2">
                 Дизайн для мобильного приложения
               </h3>
-              <p class="text-slate-300 text-sm flex-grow">
+              <p
+                class="text-slate-300 text-sm flex-grow"
+                style="color: var(--text-muted-color)"
+              >
                 Редизайн приложения для фитнеса с фокусом на пользовательском
                 опыте и геймификации.
               </p>
               <a
                 href="#"
-                class="mt-4 text-sky-300 font-semibold hover:text-sky-200 self-start"
+                class="mt-4 text-sky-400 font-semibold hover:text-sky-300 self-start"
+                style="color: var(--link-color)"
                 >Подробнее →</a
               >
             </div>
@@ -679,13 +666,17 @@
               <h3 class="text-xl font-semibold mb-2">
                 Корпоративный сайт для стартапа
               </h3>
-              <p class="text-slate-300 text-sm flex-grow">
+              <p
+                class="text-slate-300 text-sm flex-grow"
+                style="color: var(--text-muted-color)"
+              >
                 Создание сайта "под ключ" для технологического стартапа в сфере
                 AI.
               </p>
               <a
                 href="#"
-                class="mt-4 text-sky-300 font-semibold hover:text-sky-200 self-start"
+                class="mt-4 text-sky-400 font-semibold hover:text-sky-300 self-start"
+                style="color: var(--link-color)"
                 >Подробнее →</a
               >
             </div>
@@ -736,13 +727,17 @@
               <h3 class="text-xl font-semibold mb-2">
                 Интерактивная визуализация
               </h3>
-              <p class="text-slate-300 text-sm flex-grow">
+              <p
+                class="text-slate-300 text-sm flex-grow"
+                style="color: var(--text-muted-color)"
+              >
                 Разработка 3D-визуализации данных для научной конференции с
                 использованием Three.js.
               </p>
               <a
                 href="#"
-                class="mt-4 text-sky-300 font-semibold hover:text-sky-200 self-start"
+                class="mt-4 text-sky-400 font-semibold hover:text-sky-300 self-start"
+                style="color: var(--link-color)"
                 >Подробнее →</a
               >
             </div>
@@ -785,13 +780,17 @@
                 </svg>
               </div>
               <h3 class="text-xl font-semibold mb-2">E-commerce платформа</h3>
-              <p class="text-slate-300 text-sm flex-grow">
+              <p
+                class="text-slate-300 text-sm flex-grow"
+                style="color: var(--text-muted-color)"
+              >
                 Разработка интернет-магазина с кастомной админ-панелью и
                 интеграцией платежных систем.
               </p>
               <a
                 href="#"
-                class="mt-4 text-sky-300 font-semibold hover:text-sky-200 self-start"
+                class="mt-4 text-sky-400 font-semibold hover:text-sky-300 self-start"
+                style="color: var(--link-color)"
                 >Подробнее →</a
               >
             </div>
@@ -923,7 +922,10 @@
               <span>gusakov1502@gmail.com</span>
             </a>
           </div>
-          <p class="text-sm text-slate-400">
+          <p
+            class="text-sm text-slate-400"
+            style="color: var(--text-muted-color)"
+          >
             &copy; 2025 Gusakov Vladymir. Все права защищены.
           </p>
         </div>
@@ -961,103 +963,109 @@
         );
 
         // --- Анимация "Нейронная сеть" для всей страницы ---
-        const canvas = document.getElementById("page-canvas");
-        if (canvas) {
-          const ctx = canvas.getContext("2d");
-          let particlesArray;
+        const pageCanvas = document.getElementById("page-canvas");
+        if (pageCanvas) {
+          // ... (код для фоновой анимации остается без изменений) ...
+        }
+
+        // --- Логика для кнопки с молниями ---
+        const lightningButton = document.getElementById("lightning-button");
+        const lightningCanvas = document.getElementById("lightning-canvas");
+        if (lightningButton && lightningCanvas) {
+          const ctx = lightningCanvas.getContext("2d");
+          let bolts = [];
 
           const setCanvasSize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            lightningCanvas.width = lightningCanvas.offsetWidth;
+            lightningCanvas.height = lightningCanvas.offsetHeight;
           };
           setCanvasSize();
 
-          class Particle {
-            constructor(x, y, directionX, directionY, size, color) {
-              this.x = x;
-              this.y = y;
-              this.directionX = directionX;
-              this.directionY = directionY;
-              this.size = size;
-              this.color = color;
+          class LightningBolt {
+            constructor(startX, startY, endX, endY) {
+              this.startX = startX;
+              this.startY = startY;
+              this.endX = endX;
+              this.endY = endY;
+              this.alpha = 1.0;
+              this.fadeSpeed = 0.03 + Math.random() * 0.02;
+              this.segments = [];
+              this.createSegments();
             }
-            draw() {
+
+            createSegments() {
+              const dx = this.endX - this.startX;
+              const dy = this.endY - this.startY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              let currentPos = { x: this.startX, y: this.startY };
+              this.segments.push({ ...currentPos });
+
+              let remainingDist = distance;
+              while (remainingDist > 0) {
+                const segmentLength = Math.random() * 15 + 5;
+                const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.5;
+                const nextPos = {
+                  x: currentPos.x + Math.cos(angle) * segmentLength,
+                  y: currentPos.y + Math.sin(angle) * segmentLength,
+                };
+                this.segments.push({ ...nextPos });
+                currentPos = nextPos;
+                remainingDist -= segmentLength;
+              }
+              this.segments.push({ x: this.endX, y: this.endY });
+            }
+
+            draw(ctx) {
+              ctx.save();
+              ctx.globalAlpha = this.alpha;
+              ctx.strokeStyle = `rgba(103, 232, 249, ${this.alpha})`;
+              ctx.lineWidth = 1 + Math.random();
+              ctx.shadowBlur = 10;
+              ctx.shadowColor = "rgba(167, 139, 250, 0.8)";
               ctx.beginPath();
-              ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-              ctx.fillStyle = this.color;
-              ctx.fill();
+              ctx.moveTo(this.segments[0].x, this.segments[0].y);
+              for (let i = 1; i < this.segments.length; i++) {
+                ctx.lineTo(this.segments[i].x, this.segments[i].y);
+              }
+              ctx.stroke();
+              ctx.restore();
             }
+
             update() {
-              if (this.x > canvas.width || this.x < 0) {
-                this.directionX = -this.directionX;
-              }
-              if (this.y > canvas.height || this.y < 0) {
-                this.directionY = -this.directionY;
-              }
-              this.x += this.directionX;
-              this.y += this.directionY;
-              this.draw();
+              this.alpha -= this.fadeSpeed;
             }
           }
 
-          function init() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 9000;
-            for (let i = 0; i < numberOfParticles; i++) {
-              let size = Math.random() * 2 + 1;
-              let x =
-                Math.random() * (canvas.width - size * 2 - size * 2) + size * 2;
-              let y =
-                Math.random() * (canvas.height - size * 2 - size * 2) +
-                size * 2;
-              let directionX = Math.random() * 0.4 - 0.2;
-              let directionY = Math.random() * 0.4 - 0.2;
-              let color = "rgba(103, 232, 249, 0.8)"; // Cyan-300
+          lightningButton.addEventListener("click", () => {
+            const rect = lightningButton.getBoundingClientRect();
+            const headerRect = lightningCanvas.getBoundingClientRect();
+            const startX = rect.left + rect.width / 2 - headerRect.left;
+            const startY = rect.top + rect.height / 2 - headerRect.top;
 
-              particlesArray.push(
-                new Particle(x, y, directionX, directionY, size, color)
-              );
+            const boltCount = Math.floor(Math.random() * 4) + 5;
+            for (let i = 0; i < boltCount; i++) {
+              const angle = Math.random() * Math.PI * 2;
+              const length = Math.random() * (headerRect.width / 4) + 50;
+              const endX = startX + Math.cos(angle) * length;
+              const endY = startY + Math.sin(angle) * length;
+              bolts.push(new LightningBolt(startX, startY, endX, endY));
             }
-          }
-
-          function connect() {
-            let opacityValue = 1;
-            for (let a = 0; a < particlesArray.length; a++) {
-              for (let b = a; b < particlesArray.length; b++) {
-                let distance =
-                  (particlesArray[a].x - particlesArray[b].x) *
-                    (particlesArray[a].x - particlesArray[b].x) +
-                  (particlesArray[a].y - particlesArray[b].y) *
-                    (particlesArray[a].y - particlesArray[b].y);
-                if (distance < (canvas.width / 7) * (canvas.height / 7)) {
-                  opacityValue = 1 - distance / 20000;
-                  ctx.strokeStyle = "rgba(167, 139, 250," + opacityValue + ")"; // Violet-400
-                  ctx.lineWidth = 1;
-                  ctx.beginPath();
-                  ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                  ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                  ctx.stroke();
-                }
-              }
-            }
-          }
-
-          function animate() {
-            requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) {
-              particlesArray[i].update();
-            }
-            connect();
-          }
-
-          window.addEventListener("resize", () => {
-            setCanvasSize();
-            init();
           });
 
-          init();
-          animate();
+          function animateLightning() {
+            ctx.clearRect(0, 0, lightningCanvas.width, lightningCanvas.height);
+            for (let i = bolts.length - 1; i >= 0; i--) {
+              bolts[i].update();
+              bolts[i].draw(ctx);
+              if (bolts[i].alpha <= 0) {
+                bolts.splice(i, 1);
+              }
+            }
+            requestAnimationFrame(animateLightning);
+          }
+
+          window.addEventListener("resize", setCanvasSize);
+          animateLightning();
         }
       });
     </script>
