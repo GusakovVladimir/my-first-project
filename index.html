@@ -19,6 +19,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             background-color: #0f172a;
+            cursor: none; /* Приховуємо стандартний курсор */
         }
         
         #page-canvas {
@@ -41,7 +42,6 @@
             position: relative; 
         }
         
-        /* --- ИСПРАВЛЕНИЕ: Убрано overflow: hidden --- */
         .header-card {
              overflow: visible;
         }
@@ -216,29 +216,93 @@
             80% { clip-path: inset(51% 0 23% 0); }
             100% { clip-path: inset(5% 0 81% 0); }
         }
+        
         #main-headline {
             transition: color 0.3s ease-in-out;
+        }
+        #main-headline span {
+            display: inline-block;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        #main-headline:hover span {
+            animation: rainbow-text 3s infinite;
+        }
+        #main-headline.text-red-500 span {
+            color: #ef4444 !important; /* Tailwind red-500 */
+            animation: none !important;
+        }
+        
+        @keyframes rainbow-text {
+            0%, 100% { color: #67e8f9; }
+            33% { color: #a78bfa; }
+            66% { color: #f472b6; }
         }
         
         /* Стили для выпадающего меню */
         .dropdown {
             visibility: hidden;
             opacity: 0;
-            transform: translateY(-10px);
-            transition: all 0.3s ease-in-out;
-            z-index: 50; /* Добавлен z-index */
+            transform: translateY(10px) scale(0.95);
+            transition: all 0.2s ease-in-out;
+            z-index: 50;
         }
         .group:hover .dropdown {
             visibility: visible;
             opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .dropdown-item {
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+        }
+        .group:hover .dropdown-item {
+            opacity: 1;
             transform: translateY(0);
         }
+        .group:hover .dropdown-item:nth-child(1) { transition-delay: 0.05s; }
+        .group:hover .dropdown-item:nth-child(2) { transition-delay: 0.1s; }
+        .group:hover .dropdown-item:nth-child(3) { transition-delay: 0.15s; }
+        .group:hover .dropdown-item:nth-child(4) { transition-delay: 0.2s; }
+        
+        /* --- НОВЫЙ КОД: Стили для кастомного курсора --- */
+        #custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            background-color: #67e8f9;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%) scale(1);
+            transition: transform 0.2s ease-out;
+        }
+        #custom-cursor.hover {
+            transform: translate(-50%, -50%) scale(2.5);
+        }
+        .cursor-glitch-particle {
+            position: fixed;
+            z-index: 9998;
+            pointer-events: none;
+            background-color: #a78bfa;
+            animation: fade-out 0.5s forwards;
+        }
+        @keyframes fade-out {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0); }
+        }
+        /* --- КОНЕЦ НОВОГО КОДА --- */
     </style>
 </head>
 <body class="text-slate-200">
 
     <!-- Canvas для глобального фона -->
     <canvas id="page-canvas"></canvas>
+    
+    <!-- Элемент для кастомного курсора -->
+    <div id="custom-cursor"></div>
 
     <div class="relative min-h-screen px-4 sm:px-6 lg:px-8">
 
@@ -276,34 +340,31 @@
                 </div>
 
                 <div class="flex-1 flex justify-end">
-                    <!-- ОБНОВЛЕННАЯ НАВИГАЦИЯ -->
                     <nav class="hidden md:flex items-center space-x-1">
-                        <!-- Пункт "Про мене" с выпадающим меню -->
                         <div class="relative group">
                             <button class="nav-link px-3 py-2 rounded-md text-sm flex items-center gap-1">
                                 <span>Про мене</span>
                                 <svg class="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
-                            <div class="dropdown absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max">
+                            <div class="dropdown absolute top-full left-0 mt-2 w-max">
                                 <div class="glass-card p-2 !rounded-xl">
-                                    <a href="#" class="block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Біографія</a>
-                                    <a href="#" class="block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Мої захоплення</a>
-                                    <a href="#" class="block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Як я став Full-Stack Developer</a>
-                                    <a href="#" class="block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Плани на майбутнє</a>
+                                    <a href="#" class="dropdown-item block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Біографія</a>
+                                    <a href="#" class="dropdown-item block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Мої захоплення</a>
+                                    <a href="#" class="dropdown-item block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Як я став Full-Stack Developer</a>
+                                    <a href="#" class="dropdown-item block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Плани на майбутнє</a>
                                 </div>
                             </div>
                         </div>
-                        <!-- Пункт "Проєкти" с выпадающим меню -->
                         <div class="relative group">
                             <button class="nav-link px-3 py-2 rounded-md text-sm flex items-center gap-1">
                                 <span>Проєкти</span>
                                 <svg class="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
-                            <div class="dropdown absolute top-full left-1/2 -translate-x-1/2 mt-2 w-max">
+                            <div class="dropdown absolute top-full left-0 mt-2 w-max">
                                 <div class="glass-card p-2 !rounded-xl">
-                                    <a href="#" class="block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Реалізовані проєкти</a>
-                                    <a href="#" class="block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Проєкти майбутнього</a>
-                                    <a href="#" class="block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Проєкти з використанням AI</a>
+                                    <a href="#" class="dropdown-item block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Реалізовані проєкти</a>
+                                    <a href="#" class="dropdown-item block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Проєкти майбутнього</a>
+                                    <a href="#" class="dropdown-item block w-full text-left px-4 py-2 text-sm text-slate-200 rounded-lg hover:bg-slate-700/50">Проєкти з використанням AI</a>
                                 </div>
                             </div>
                         </div>
@@ -331,7 +392,9 @@
 
             <section class="text-center py-12 reveal-on-scroll">
                 <div class="glass-card p-8 md:p-12">
-                    <h1 id="main-headline" class="text-4xl md:text-6xl font-bold mb-4">Hello, я Full-Stack Developer</h1>
+                    <h1 id="main-headline" class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+                        <!-- Контент генерується JS -->
+                    </h1>
                     <p class="text-lg md:text-xl text-slate-300">
                         Створюю красиві та функціональні веб-додатки від ідеї до розгортання.
                     </p>
@@ -440,28 +503,28 @@
             <div class="glass-card container mx-auto p-6 text-center">
                 <p class="mb-4">Готові до співпраці? Зв'яжіться зі мною!</p>
                 <div class="flex justify-center items-center flex-wrap gap-x-6 gap-y-4 mb-4 text-sm sm:text-base">
-                    <a href="https://t.me/VladimirGusakov" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 hover:text-sky-300 transition-colors">
+                    <a href="https://t.me/VladimirGusakov" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 hover:text-sky-300 transition-colors magnetic-button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"></path></svg>
                         <span>Telegram</span>
                     </a>
-                    <a href="https://www.linkedin.com/in/%D0%B2%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80-%D0%B3%D1%83%D1%81%D0%B0%D0%BA%D0%BE%D0%B2-ab440b110/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 hover:text-sky-300 transition-colors">
+                    <a href="https://www.linkedin.com/in/%D0%B2%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80-%D0%B3%D1%83%D1%81%D0%B0%D0%BA%D0%BE%D0%B2-ab440b110/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 hover:text-sky-300 transition-colors magnetic-button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                         <span>LinkedIn</span>
                     </a>
-                    <a href="https://github.com/GusakovVladimir" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 hover:text-sky-300 transition-colors">
+                    <a href="https://github.com/GusakovVladimir" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 hover:text-sky-300 transition-colors magnetic-button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
                         <span>GitHub</span>
                     </a>
-                    <a href="tel:+380933883319" class="flex items-center gap-2 hover:text-sky-300 transition-colors">
+                    <a href="tel:+380933883319" class="flex items-center gap-2 hover:text-sky-300 transition-colors magnetic-button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                         <span>+38-093-388-33-19</span>
                     </a>
-                    <a href="mailto:gusakov1502@gmail.com" class="flex items-center gap-2 hover:text-sky-300 transition-colors">
+                    <a href="mailto:gusakov1502@gmail.com" class="flex items-center gap-2 hover:text-sky-300 transition-colors magnetic-button">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                         <span>gusakov1502@gmail.com</span>
                     </a>
                 </div>
-                <p class="text-sm text-slate-400">&copy; 2025 Gusakov Volodymir. Всі права захищені.</p>
+                <!-- Убрана строка с копирайтом -->
             </footer>
 
     </div>
@@ -658,6 +721,61 @@
 
                 window.addEventListener('resize', setCanvasSize);
                 animateLightning();
+            }
+
+            // --- Логика для анимированного заголовка ---
+            const mainHeadlineEl = document.getElementById('main-headline');
+            if(mainHeadlineEl) {
+                const text = "Hello, я Full-Stack<br>Developer";
+                const parts = text.split('<br>');
+                
+                let html = '';
+                parts.forEach((part, index) => {
+                    html += part.split('').map(char => `<span>${char === ' ' ? '&nbsp;' : char}</span>`).join('');
+                    if (index < parts.length - 1) {
+                        html += '<br>';
+                    }
+                });
+                mainHeadlineEl.innerHTML = html;
+
+                const spans = mainHeadlineEl.querySelectorAll('span');
+                spans.forEach((span, i) => {
+                    span.style.animationDelay = `${i * 0.05}s`;
+                });
+            }
+
+            // --- Логика для курсора и магнитных кнопок ---
+            const customCursor = document.getElementById('custom-cursor');
+            if (customCursor) {
+                window.addEventListener('mousemove', (e) => {
+                    customCursor.style.left = e.clientX + 'px';
+                    customCursor.style.top = e.clientY + 'px';
+                });
+
+                const interactiveElements = document.querySelectorAll('a, button');
+                interactiveElements.forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        customCursor.classList.add('hover');
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        customCursor.classList.remove('hover');
+                    });
+                });
+
+                const magneticButtons = document.querySelectorAll('.magnetic-button');
+                magneticButtons.forEach(button => {
+                    button.addEventListener('mousemove', (e) => {
+                        const rect = button.getBoundingClientRect();
+                        const x = e.clientX - rect.left - rect.width / 2;
+                        const y = e.clientY - rect.top - rect.height / 2;
+                        button.style.transition = 'transform 0.1s ease-out';
+                        button.style.transform = `translate(${x * 0.4}px, ${y * 0.4}px)`;
+                    });
+                    button.addEventListener('mouseleave', () => {
+                        button.style.transition = 'transform 0.3s ease-out';
+                        button.style.transform = 'translate(0, 0)';
+                    });
+                });
             }
         });
     </script>
