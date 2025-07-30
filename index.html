@@ -72,23 +72,26 @@
 
       .nav-link {
         transition: all 0.3s ease;
-        text-shadow: 0 0 0 rgba(255, 255, 255, 0);
+        position: relative;
+        z-index: 1;
       }
 
       .nav-link:hover {
         color: #fff;
-        animation: fire-flicker 1.5s infinite linear;
+        background: linear-gradient(90deg, #67e8f9, #a78bfa, #f472b6, #67e8f9);
+        background-size: 300% 300%;
+        animation: aurora-nav 4s linear infinite;
       }
 
-      @keyframes fire-flicker {
-        0%,
-        100% {
-          text-shadow: 0 0 4px #fff, 0 0 10px #ffae42, 0 0 18px #ffae42,
-            0 0 38px #ff4500;
+      @keyframes aurora-nav {
+        0% {
+          background-position: 0% 50%;
         }
         50% {
-          text-shadow: 0 0 6px #fff, 0 0 12px #ffae42, 0 0 22px #ffae42,
-            0 0 45px #ff4500;
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
         }
       }
 
@@ -126,44 +129,56 @@
         }
       }
 
-      .logo-container-v5 .bracket-shape {
-        opacity: 0;
-        animation: morph-brackets 6s infinite;
+      /* --- ОБНОВЛЕННЫЙ КОД: Анимация для логотипа "Дерево DOM" --- */
+      .logo-dom-tree {
+        animation: rotate-logo 10s linear infinite; /* Добавлено вращение */
       }
-      .logo-container-v5 .shape-2 {
-        animation-delay: 2s;
+      .logo-dom-tree .node {
+        animation: pulse-node 3s infinite ease-in-out;
       }
-      .logo-container-v5 .shape-3 {
-        animation-delay: 4s;
+      .logo-dom-tree .line {
+        stroke-dasharray: 25;
+        stroke-dashoffset: 50;
+        animation: flow-line 3s infinite linear;
+      }
+      .logo-dom-tree .node-2 {
+        animation-delay: 0.5s;
+      }
+      .logo-dom-tree .node-3 {
+        animation-delay: 1s;
+      }
+      .logo-dom-tree .line-2 {
+        animation-delay: 0.5s;
       }
 
-      .logo-container-v5 .logo-text-v5 {
-        transition: fill 0.3s ease;
-      }
-      .logo-container-v5:hover .logo-text-v5 {
-        fill: #a78bfa; /* violet-400 */
-      }
-
-      @keyframes morph-brackets {
-        0% {
-          opacity: 0;
+      @keyframes rotate-logo {
+        from {
+          transform: rotate(0deg);
         }
-        16% {
-          opacity: 1;
+        to {
+          transform: rotate(360deg);
         }
-        33% {
-          opacity: 1;
+      }
+      @keyframes pulse-node {
+        0%,
+        100% {
+          r: 4;
         }
         50% {
-          opacity: 0;
-        }
-        100% {
-          opacity: 0;
+          r: 5;
         }
       }
+      @keyframes flow-line {
+        from {
+          stroke-dashoffset: 50;
+        }
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      /* --- КОНЕЦ ОБНОВЛЕННОГО КОДА --- */
 
       /* Стили для анимированных SVG в проектах */
-      /* Проект 1: UI/UX */
       .anim-proj1-rect {
         animation: proj1-rect-anim 4s infinite ease-in-out;
       }
@@ -196,7 +211,6 @@
         }
       }
 
-      /* Проект 2: AI */
       .anim-proj2-node {
         animation: proj2-node-anim 3s infinite ease-in-out;
       }
@@ -222,7 +236,6 @@
         }
       }
 
-      /* Проект 3: Data Viz */
       .anim-proj3-line {
         stroke-dasharray: 300;
         stroke-dashoffset: 300;
@@ -256,7 +269,6 @@
         }
       }
 
-      /* Проект 4: E-commerce */
       .anim-proj4-item {
         animation: proj4-item-anim 3s infinite ease-in;
       }
@@ -272,7 +284,6 @@
         80%,
         100% {
           opacity: 0;
-          transform: translate(0, 0);
         }
       }
     </style>
@@ -286,75 +297,48 @@
         <div
           class="relative z-10 container mx-auto flex justify-between items-center p-4"
         >
-          <div class="flex items-center gap-3 md:gap-4">
-            <a href="#" class="logo-container-v5">
+          <!-- ОБНОВЛЕННЫЙ БЛОК ЛОГОТИПА И ИМЕНИ -->
+          <div class="flex items-center gap-3">
+            <a href="#">
               <svg
-                width="200"
-                height="28"
-                viewBox="0 0 200 28"
-                fill="none"
+                class="logo-dom-tree"
+                width="32"
+                height="32"
+                viewBox="0 0 40 40"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <g>
-                  <path
-                    d="M15 4C10.8579 4 7.5 7.85786 7.5 12.5V15.5C7.5 20.1421 10.8579 24 15 24"
-                    stroke="#67e8f9"
-                    stroke-width="2"
-                    class="bracket-shape shape-1"
-                  />
-                  <path
-                    d="M25 4C29.1421 4 32.5 7.85786 32.5 12.5V15.5C32.5 20.1421 29.1421 24 25 24"
-                    stroke="#67e8f9"
-                    stroke-width="2"
-                    class="bracket-shape shape-1"
-                  />
-                  <path
-                    d="M15 4H10V24H15"
-                    stroke="#a78bfa"
-                    stroke-width="2"
-                    class="bracket-shape shape-2"
-                  />
-                  <path
-                    d="M25 4H30V24H25"
-                    stroke="#a78bfa"
-                    stroke-width="2"
-                    class="bracket-shape shape-2"
-                  />
-                  <path
-                    d="M15 4C11.6667 7.33333 11.6667 18.6667 15 22"
-                    stroke="white"
-                    stroke-width="2"
-                    class="bracket-shape shape-3"
-                  />
-                  <path
-                    d="M25 4C28.3333 7.33333 28.3333 18.6667 25 22"
-                    stroke="white"
-                    stroke-width="2"
-                    class="bracket-shape shape-3"
-                  />
+                <g fill="#a78bfa">
+                  <circle cx="20" cy="8" r="4" class="node node-1" />
+                  <circle cx="10" cy="32" r="4" class="node node-2" />
+                  <circle cx="30" cy="32" r="4" class="node node-3" />
                 </g>
-                <text
-                  x="48"
-                  y="20"
-                  font-family="Inter, sans-serif"
-                  font-size="14"
-                  font-weight="500"
-                  fill="white"
-                  class="logo-text-v5"
-                >
-                  FullStack Developer
-                </text>
+                <g fill="none" stroke="#67e8f9" stroke-width="1.5">
+                  <path d="M 20 12 V 28" class="line line-1" />
+                  <path d="M 20 28 L 10 32" class="line line-2" />
+                  <path d="M 20 28 L 30 32" class="line line-1" />
+                </g>
               </svg>
             </a>
-            <div class="text-xl font-bold tracking-wider hidden sm:block">
-              <a href="#" class="name-gradient-hover"> Gusakov Vladymir </a>
+            <div class="flex flex-col">
+              <div class="text-lg font-bold tracking-wider leading-tight">
+                <a href="#" class="name-gradient-hover">Gusakov Vladymir</a>
+              </div>
+              <div class="text-xs text-slate-400 leading-tight">
+                FullStack Developer
+              </div>
             </div>
           </div>
 
-          <nav class="hidden md:flex space-x-8">
-            <a href="#about" class="nav-link">Обо мне</a>
-            <a href="#projects" class="nav-link">Проекты</a>
-            <a href="#contact" class="nav-link">Контакты</a>
+          <nav class="hidden md:flex space-x-1">
+            <a href="#about" class="nav-link px-3 py-2 rounded-md text-sm"
+              >Обо мне</a
+            >
+            <a href="#projects" class="nav-link px-3 py-2 rounded-md text-sm"
+              >Проекты</a
+            >
+            <a href="#contact" class="nav-link px-3 py-2 rounded-md text-sm"
+              >Контакты</a
+            >
           </nav>
           <button id="mobile-menu-button" class="md:hidden z-30">
             <svg
@@ -744,7 +728,6 @@
       <footer id="contact" class="py-8 mt-12 reveal-on-scroll">
         <div class="glass-card container mx-auto p-6 text-center">
           <p class="mb-4">Готовы к сотрудничеству? Свяжитесь со мной!</p>
-          <!-- ОБНОВЛЕННЫЙ БЛОК ССЫЛОК С КОНТАКТАМИ -->
           <div
             class="flex justify-center items-center flex-wrap gap-x-6 gap-y-4 mb-4 text-sm sm:text-base"
           >
