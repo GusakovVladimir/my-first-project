@@ -13,6 +13,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Підключення Tone.js для звукових ефектів -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -265,7 +268,7 @@
         .group:hover .dropdown-item:nth-child(3) { transition-delay: 0.15s; }
         .group:hover .dropdown-item:nth-child(4) { transition-delay: 0.2s; }
         
-        /* --- НОВЫЙ КОД: Стили для кастомного курсора --- */
+        /* Стили для кастомного курсора */
         #custom-cursor {
             position: fixed;
             top: 0;
@@ -293,7 +296,41 @@
             from { opacity: 1; transform: scale(1); }
             to { opacity: 0; transform: scale(0); }
         }
-        /* --- КОНЕЦ НОВОГО КОДА --- */
+        
+        /* Стили для стрічки коду */
+        .code-ticker-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .code-ticker {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+            overflow: hidden;
+            padding: 8px 0;
+        }
+        .code-ticker-content {
+            display: inline-block;
+            animation: ticker-scroll 60s linear infinite;
+        }
+        .code-ticker-content span {
+            margin: 0 20px;
+            font-family: 'monospace';
+            font-size: 14px;
+        }
+        .code-ticker-content .html { color: #f472b6; }
+        .code-ticker-content .css { color: #67e8f9; }
+        .code-ticker-content .js { color: #a78bfa; }
+        @keyframes ticker-scroll {
+            from { transform: translateX(0%); }
+            to { transform: translateX(-50%); }
+        }
     </style>
 </head>
 <body class="text-slate-200">
@@ -528,6 +565,26 @@
             </footer>
 
     </div>
+    
+    <div class="code-ticker-wrapper">
+        <div class="code-ticker">
+            <div class="code-ticker-content">
+                <span class="html">&lt;div class="container"&gt;</span>
+                <span class="css">.glass-card { backdrop-filter: blur(20px); }</span>
+                <span class="js">document.getElementById('root')</span>
+                <span class="html">&lt;h1&gt;Hello World&lt;/h1&gt;</span>
+                <span class="css">body { color: var(--text-color); }</span>
+                <span class="js">const component = () => { ... }</span>
+                 <!-- Дублюємо контент для безшовної анімації -->
+                <span class="html">&lt;div class="container"&gt;</span>
+                <span class="css">.glass-card { backdrop-filter: blur(20px); }</span>
+                <span class="js">document.getElementById('root')</span>
+                <span class="html">&lt;h1&gt;Hello World&lt;/h1&gt;</span>
+                <span class="css">body { color: var(--text-color); }</span>
+                <span class="js">const component = () => { ... }</span>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -573,7 +630,9 @@
                     update() {
                         if (this.x > pageCanvas.width || this.x < 0) { this.directionX = -this.directionX; }
                         if (this.y > pageCanvas.height || this.y < 0) { this.directionY = -this.directionY; }
-                        this.x += this.directionX; this.y += this.directionY; this.draw();
+                        this.x += this.directionX;
+                        this.y += this.directionY;
+                        this.draw();
                     }
                 }
 
@@ -586,27 +645,7 @@
                         let y = (Math.random() * ((pageCanvas.height - size * 2) - (size * 2)) + size * 2);
                         let directionX = (Math.random() * .4) - .2;
                         let directionY = (Math.random() * .4) - .2;
-                        let color = 'rgba(103, 232, 249, 0.8)'; // Cyan-300
-
-                        particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
-                    }
-                }
-
-                function connect() {
-                    let opacityValue = 1;
-                    for (let a = 0; a < particlesArray.length; a++) {
-                        for (let b = a; b < particlesArray.length; b++) {
-                            let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                            if (distance < (pageCanvas.width / 7) * (pageCanvas.height / 7)) {
-                                opacityValue = 1 - (distance / 20000);
-                                ctx.strokeStyle = 'rgba(167, 139, 250,' + opacityValue + ')'; // Violet-400
-                                ctx.lineWidth = 1;
-                                ctx.beginPath();
-                                ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                                ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                                ctx.stroke();
-                            }
-                        }
+                        particlesArray.push(new Particle(x, y, directionX, directionY, size, 'rgba(103, 232, 249, 0.8)'));
                     }
                 }
 
@@ -617,6 +656,24 @@
                         particlesArray[i].update();
                     }
                     connect();
+                }
+                
+                function connect() {
+                    let opacityValue = 1;
+                    for (let a = 0; a < particlesArray.length; a++) {
+                        for (let b = a; b < particlesArray.length; b++) {
+                            let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                            if (distance < (pageCanvas.width / 7) * (pageCanvas.height / 7)) {
+                                opacityValue = 1 - (distance / 20000);
+                                ctx.strokeStyle = 'rgba(167, 139, 250,' + opacityValue + ')';
+                                ctx.lineWidth = 1;
+                                ctx.beginPath();
+                                ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                                ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                                ctx.stroke();
+                            }
+                        }
+                    }
                 }
 
                 window.addEventListener('resize', () => {
@@ -747,10 +804,39 @@
             // --- Логика для курсора и магнитных кнопок ---
             const customCursor = document.getElementById('custom-cursor');
             if (customCursor) {
+                let lastMove = 0;
+                let glitchTimeout;
+
                 window.addEventListener('mousemove', (e) => {
                     customCursor.style.left = e.clientX + 'px';
                     customCursor.style.top = e.clientY + 'px';
+                    
+                    clearTimeout(glitchTimeout);
+                    document.body.classList.remove('cursor-glitching');
+
+                    glitchTimeout = setTimeout(() => {
+                        if (Date.now() - lastMove > 100) {
+                           createGlitch(e.clientX, e.clientY);
+                        }
+                    }, 100);
+                    lastMove = Date.now();
                 });
+
+                function createGlitch(x, y) {
+                     const particleCount = 5 + Math.random() * 5;
+                     for (let i = 0; i < particleCount; i++) {
+                        const particle = document.createElement('div');
+                        particle.classList.add('cursor-glitch-particle');
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = Math.random() * 15 + 5;
+                        particle.style.width = `${Math.random() * 3 + 1}px`;
+                        particle.style.height = `${Math.random() * 3 + 1}px`;
+                        particle.style.left = `${x + Math.cos(angle) * distance}px`;
+                        particle.style.top = `${y + Math.sin(angle) * distance}px`;
+                        document.body.appendChild(particle);
+                        setTimeout(() => particle.remove(), 500);
+                     }
+                }
 
                 const interactiveElements = document.querySelectorAll('a, button');
                 interactiveElements.forEach(el => {
