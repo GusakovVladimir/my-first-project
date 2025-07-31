@@ -299,7 +299,9 @@
                 </div>
 
                 <div class="flex-shrink-0 hidden md:flex">
-                    <button id="lightning-button" class="lightning-button group w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-300"></button>
+                    <a href="./index.html">
+                        <button id="lightning-button" class="lightning-button group w-12 h-12 rounded-full flex items-center justify-center transition-transform duration-300"></button>
+                    </a>
                 </div>
 
                 <div class="flex-1 flex justify-end">
@@ -539,74 +541,62 @@
             const logoContainer = document.getElementById('logo-container');
 
             if (bgCanvas && logoContainer && typeof THREE !== 'undefined') {
-                // --- 3D Фон: Плексус ---
+                // --- 3D Фон: Цифровий тунель ---
                 const bgScene = new THREE.Scene();
-                const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+                const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
                 const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true });
                 bgRenderer.setSize(window.innerWidth, window.innerHeight);
-                bgCamera.position.z = 300;
 
-                let points = [];
-                let lines;
-                const pointCount = 500;
-                const pointGeometry = new THREE.BufferGeometry();
-                const positions = new Float32Array(pointCount * 3);
-
-                for(let i = 0; i < pointCount; i++) {
-                    const x = (Math.random() - 0.5) * 800;
-                    const y = (Math.random() - 0.5) * 800;
-                    const z = (Math.random() - 0.5) * 800;
-                    points.push(new THREE.Vector3(x, y, z));
-                    positions[i * 3] = x;
-                    positions[i * 3 + 1] = y;
-                    positions[i * 3 + 2] = z;
+                const tunnelGroup = new THREE.Group();
+                const ringCount = 100;
+                const ringMaterial = new THREE.LineBasicMaterial({ color: 0x67e8f9, transparent: true, opacity: 0.3 });
+                for(let i = 0; i < ringCount; i++) {
+                    const geometry = new THREE.RingGeometry(10, 10.1, 64);
+                    const ring = new THREE.LineLoop(geometry, ringMaterial);
+                    ring.position.z = (i - ringCount / 2) * 5;
+                    tunnelGroup.add(ring);
                 }
-                pointGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                const pointMaterial = new THREE.PointsMaterial({ color: 0x67e8f9, size: 2 });
-                const pointMesh = new THREE.Points(pointGeometry, pointMaterial);
-                bgScene.add(pointMesh);
+                bgScene.add(tunnelGroup);
+                bgCamera.position.z = 250;
 
-                const lineGeometry = new THREE.BufferGeometry();
-                const lineMaterial = new THREE.LineBasicMaterial({ color: 0xa78bfa, transparent: true, opacity: 0.3 });
-                lines = new THREE.LineSegments(lineGeometry, lineMaterial);
-                bgScene.add(lines);
-
-                // --- 3D Логотип: Вузол даних ---
+                // --- 3D Логотип: Символи, що морфлять ---
                 const logoScene = new THREE.Scene();
                 const logoCamera = new THREE.PerspectiveCamera(75, logoContainer.clientWidth / logoContainer.clientHeight, 0.1, 1000);
                 const logoRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
                 logoRenderer.setSize(logoContainer.clientWidth, logoContainer.clientHeight);
                 logoContainer.appendChild(logoRenderer.domElement);
+                
+                const loader = new THREE.FontLoader();
+                let morphingText;
+                // Загрузка шрифта (используем стандартный шрифт Three.js)
+                loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+                    const textMaterial = new THREE.MeshBasicMaterial({ color: 0xa78bfa, transparent: true });
+                    
+                    const geo1 = new THREE.TextGeometry('</>', { font: font, size: 1.2, height: 0.1 });
+                    const geo2 = new THREE.TextGeometry('{}', { font: font, size: 1.2, height: 0.1 });
+                    
+                    geo1.center();
+                    geo2.center();
 
-                const logoGroup = new THREE.Group();
-                const icosahedronGeometry = new THREE.IcosahedronGeometry(1, 0);
-                const wireframe = new THREE.LineSegments(
-                    new THREE.EdgesGeometry(icosahedronGeometry),
-                    new THREE.LineBasicMaterial({ color: 0x67e8f9, linewidth: 2 })
-                );
-                logoGroup.add(wireframe);
-
-                const vertices = icosahedronGeometry.attributes.position;
-                const vertexSpheres = new THREE.Group();
-                for (let i = 0; i < vertices.count; i++) {
-                    const vertex = new THREE.Vector3().fromBufferAttribute(vertices, i);
-                    const sphere = new THREE.Mesh(
-                        new THREE.SphereGeometry(0.1, 8, 8),
-                        new THREE.MeshBasicMaterial({ color: 0xa78bfa })
-                    );
-                    sphere.position.copy(vertex);
-                    vertexSpheres.add(sphere);
-                }
-                logoGroup.add(vertexSpheres);
-                logoScene.add(logoGroup);
-                logoCamera.position.z = 3;
+                    // Убедимся, что геометрии имеют одинаковое количество вершин
+                    THREE.BufferGeometryUtils.makeIndexed(geo1);
+                    THREE.BufferGeometryUtils.makeIndexed(geo2);
+                    const targetGeo = THREE.BufferGeometryUtils.mergeBufferGeometries([geo1, geo2], true);
+                    
+                    if (targetGeo) {
+                        morphingText = new THREE.Mesh(targetGeo, textMaterial);
+                        logoScene.add(morphingText);
+                    }
+                });
+                
+                logoCamera.position.z = 2;
 
                 let mouseX = 0, mouseY = 0;
                 const clock = new THREE.Clock();
 
                 document.addEventListener('mousemove', (event) => {
-                    mouseX = event.clientX;
-                    mouseY = event.clientY;
+                    mouseX = (event.clientX - window.innerWidth / 2) / 100;
+                    mouseY = (event.clientY - window.innerHeight / 2) / 100;
                 });
 
                 function animate() {
@@ -614,33 +604,21 @@
                     const elapsedTime = clock.getElapsedTime();
 
                     // Анимация фона
-                    const linePositions = [];
-                    for(let i = 0; i < pointCount; i++) {
-                        const p1 = points[i];
-                        const distToMouse = p1.distanceTo(new THREE.Vector3((mouseX - window.innerWidth / 2) * 0.5, (-mouseY + window.innerHeight / 2) * 0.5, 0));
-                        if(distToMouse < 150) {
-                            for(let j = i + 1; j < pointCount; j++) {
-                                const p2 = points[j];
-                                const distance = p1.distanceTo(p2);
-                                if(distance < 50) {
-                                    linePositions.push(p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
-                                }
-                            }
-                        }
-                    }
-                    lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-                    lines.geometry.attributes.position.needsUpdate = true;
-
-                    pointMesh.rotation.y += 0.0005;
-                    lines.rotation.y += 0.0005;
+                    tunnelGroup.position.z += 0.2;
+                    if(tunnelGroup.position.z > 250) tunnelGroup.position.z = 0;
+                    bgCamera.position.x += (mouseX - bgCamera.position.x) * 0.05;
+                    bgCamera.position.y += (-mouseY - bgCamera.position.y) * 0.05;
+                    bgCamera.lookAt(bgScene.position);
                     bgRenderer.render(bgScene, bgCamera);
 
                     // Анимация логотипа
-                    logoGroup.rotation.x += 0.005;
-                    logoGroup.rotation.y += 0.005;
-                    vertexSpheres.children.forEach(sphere => {
-                        sphere.scale.setScalar(Math.sin(elapsedTime * 2 + sphere.position.x) * 0.5 + 1);
-                    });
+                    if (morphingText) {
+                        morphingText.rotation.y = elapsedTime * 0.5;
+                        const morphValue = (Math.sin(elapsedTime) + 1) / 2;
+                        if(morphingText.morphTargetInfluences) {
+                           morphingText.morphTargetInfluences[0] = morphValue;
+                        }
+                    }
                     logoRenderer.render(logoScene, logoCamera);
                 }
                 animate();
